@@ -21,3 +21,13 @@ test("buttons show the pointer cursor so they read as clickable", async ({ page 
 
   await expect(page.getByRole("button", { name: "Continue" })).toHaveCSS("cursor", "pointer");
 });
+
+test("the page declares a PNG favicon that loads", async ({ page, request }) => {
+  await page.goto("/booking/gold-spa");
+
+  const href = await page.locator('link[rel="icon"][type="image/png"]').getAttribute("href");
+  expect(href).toBeTruthy();
+  const response = await request.get(href!);
+  expect(response.ok()).toBe(true);
+  expect(response.headers()["content-type"]).toBe("image/png");
+});
