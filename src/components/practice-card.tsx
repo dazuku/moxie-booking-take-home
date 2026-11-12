@@ -10,7 +10,7 @@ export function PracticeCard({ practice }: { practice: Practice }) {
     >
       <div className="flex flex-col items-center gap-4">
         <div className="flex size-16 items-center justify-center rounded-full border bg-card">
-          <Image src={practice.logoUrl} alt="" width={56} height={28} />
+          <Image src={practice.logoUrl} alt="" width={48} height={33} />
         </div>
         <h2 className="text-base font-bold">{practice.name}</h2>
       </div>

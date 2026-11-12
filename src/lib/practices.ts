@@ -22,7 +22,7 @@ const practices: Practice[] = [
   {
     slug: "gold-spa",
     name: "Gold Spa",
-    logoUrl: "/gold-spa-logo.svg",
+    logoUrl: "/gold-spa-logo.png",
     addressLines: ["2525 Camino del Rio S", "Suite 315 Room 8", "San Diego, CA 92108"],
     email: "goldspa@gmail.com",
     phone: "+11 123 4567 222",
