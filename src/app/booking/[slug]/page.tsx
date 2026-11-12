@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { BookingSkeleton } from "@/components/booking-layout";
 import { BookingFlow } from "@/components/booking/booking-flow";
 import { PracticeCard } from "@/components/practice-card";
+import { ServicesSummary } from "@/components/services-summary";
 import { getPractice, getPracticeSlugs } from "@/lib/practices";
 
 export function generateStaticParams() {
@@ -37,5 +38,10 @@ async function Booking({ params }: { params: Params }) {
   const practice = await getPractice(slug);
   if (!practice) notFound();
 
-  return <BookingFlow practiceCard={<PracticeCard practice={practice} />} />;
+  return (
+    <BookingFlow
+      practiceCard={<PracticeCard practice={practice} />}
+      servicesSummary={<ServicesSummary services={practice.selectedServices} />}
+    />
+  );
 }

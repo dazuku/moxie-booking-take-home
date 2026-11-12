@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactNode, useEffect, useRef, useState } from "react";
-import { BookingMain } from "@/components/booking-layout";
+import { BookingMain, placement } from "@/components/booking-layout";
 import { Button } from "@/components/ui/button";
 import { type ContactDetails, type ContactFormValues, formatUsPhone } from "@/lib/booking-schema";
 import { ContactStep } from "./contact-step";
@@ -11,11 +11,12 @@ type Step = "contact" | "payment";
 const CONTACT_FORM_ID = "contact-form";
 
 type BookingFlowProps = {
-  /** Rendered on the server and passed in, so it ships no client JS. */
+  /** Rendered on the server and passed in, so they ship no client JS. */
   practiceCard: ReactNode;
+  servicesSummary: ReactNode;
 };
 
-export function BookingFlow({ practiceCard }: BookingFlowProps) {
+export function BookingFlow({ practiceCard, servicesSummary }: BookingFlowProps) {
   const [step, setStep] = useState<Step>("contact");
   const [contact, setContact] = useState<ContactDetails>();
   const stepRef = useStepFocus(step);
@@ -25,25 +26,48 @@ export function BookingFlow({ practiceCard }: BookingFlowProps) {
     setStep("payment");
   }
 
+  const practice = (
+    <div key="practice" className={placement.practice}>
+      {practiceCard}
+    </div>
+  );
+  const services = (
+    <div key="services" className={placement.services}>
+      {servicesSummary}
+    </div>
+  );
+  const stepCard = (
+    <section
+      key="step"
+      ref={stepRef}
+      tabIndex={-1}
+      className={`rounded-lg border bg-card p-6 outline-none md:p-8 ${placement.step}`}
+    >
+      {step === "contact" && (
+        <ContactStep
+          formId={CONTACT_FORM_ID}
+          onSubmit={handleContact}
+          defaultValues={contact && toFormValues(contact)}
+        />
+      )}
+
+      {/* Slice 3 replaces this with the payment form. */}
+      {step === "payment" && (
+        <h2 className="text-base font-bold">Secure your appointment by card</h2>
+      )}
+    </section>
+  );
+
   return (
     <>
       <BookingMain>
-        {practiceCard}
-
-        <section ref={stepRef} tabIndex={-1} className="rounded-lg border bg-card p-6 outline-none md:p-8">
-          {step === "contact" && (
-            <ContactStep
-              formId={CONTACT_FORM_ID}
-              onSubmit={handleContact}
-              defaultValues={contact && toFormValues(contact)}
-            />
-          )}
-
-          {/* Slice 3 replaces this with the payment form. */}
-          {step === "payment" && (
-            <h2 className="text-base font-bold">Secure your appointment by card</h2>
-          )}
-        </section>
+        {/*
+          Phones show these in DOM order (so tab and screen-reader order match):
+          contact starts with who and what you are booking; payment goes
+          straight to the card form, with the summary one scroll away.
+          From 1024px the placement classes put them in two columns.
+        */}
+        {step === "contact" ? [practice, services, stepCard] : [stepCard, services, practice]}
       </BookingMain>
 
       <footer className="sticky bottom-0 border-t bg-card">
