@@ -73,6 +73,11 @@
   body {
     @apply bg-background text-foreground;
   }
+  /* Tailwind v4 resets buttons to the default cursor; clickable things should look clickable. */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
   html {
     @apply font-sans;
     /* Keep native controls (autofill, checkboxes, scrollbars) light too. */

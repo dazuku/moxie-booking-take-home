@@ -15,3 +15,9 @@ test("inputs stay white on the card when the device is in dark mode", async ({ p
   }
   await expect(page.locator("html")).toHaveCSS("color-scheme", "light");
 });
+
+test("buttons show the pointer cursor so they read as clickable", async ({ page }) => {
+  await page.goto("/booking/gold-spa");
+
+  await expect(page.getByRole("button", { name: "Continue" })).toHaveCSS("cursor", "pointer");
+});
