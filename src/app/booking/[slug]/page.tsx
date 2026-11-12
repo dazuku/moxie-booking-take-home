@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
+import { BookingMain, BookingSkeleton } from "@/components/booking-layout";
 import { PracticeCard } from "@/components/practice-card";
 import { getPractice, getPracticeSlugs } from "@/lib/practices";
 
@@ -15,26 +17,35 @@ export async function generateMetadata(
   return { title: practice ? `Book with ${practice.name}` : "Practice not found" };
 }
 
-export default async function BookingPage(props: PageProps<"/booking/[slug]">) {
-  const { slug } = await props.params;
+type Params = PageProps<"/booking/[slug]">["params"];
+
+// The page never waits: it renders a skeleton straight away, and only the
+// part that needs the practice suspends on `params`.
+export default function BookingPage(props: PageProps<"/booking/[slug]">) {
+  return (
+    <div className="flex flex-1 flex-col">
+      <Suspense fallback={<BookingSkeleton />}>
+        <Booking params={props.params} />
+      </Suspense>
+    </div>
+  );
+}
+
+async function Booking({ params }: { params: Params }) {
+  const { slug } = await params;
   const practice = await getPractice(slug);
   if (!practice) notFound();
 
   return (
-    <div className="flex flex-1 flex-col">
-      {/* Stacked below 1024px (phones, portrait tablets); two columns above. */}
-      <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-4 md:px-8 md:py-8 lg:max-w-5xl">
-        <h1 className="mb-4 text-center text-base font-bold lg:sr-only">Book appointment</h1>
+    <>
+      <BookingMain>
+        <PracticeCard practice={practice} />
 
-        <div className="grid items-start gap-4 md:gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
-          <PracticeCard practice={practice} />
-
-          {/* Slice 2 replaces this with the client-side booking flow. */}
-          <section className="rounded-lg border bg-card p-6 md:p-8">
-            <h2 className="text-base font-bold">Enter your details below</h2>
-          </section>
-        </div>
-      </main>
+        {/* Slice 2 replaces this with the client-side booking flow. */}
+        <section className="rounded-lg border bg-card p-6 md:p-8">
+          <h2 className="text-base font-bold">Enter your details below</h2>
+        </section>
+      </BookingMain>
 
       <footer className="sticky bottom-0 border-t bg-card">
         <div className="mx-auto flex w-full max-w-2xl justify-end px-4 py-3 md:px-8 lg:max-w-5xl">
@@ -46,6 +57,6 @@ export default async function BookingPage(props: PageProps<"/booking/[slug]">) {
           </button>
         </div>
       </footer>
-    </div>
+    </>
   );
 }
