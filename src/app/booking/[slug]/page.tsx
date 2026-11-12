@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { BookingMain, BookingSkeleton } from "@/components/booking-layout";
+import { BookingSkeleton } from "@/components/booking-layout";
+import { BookingFlow } from "@/components/booking/booking-flow";
 import { PracticeCard } from "@/components/practice-card";
 import { getPractice, getPracticeSlugs } from "@/lib/practices";
 
@@ -36,27 +37,5 @@ async function Booking({ params }: { params: Params }) {
   const practice = await getPractice(slug);
   if (!practice) notFound();
 
-  return (
-    <>
-      <BookingMain>
-        <PracticeCard practice={practice} />
-
-        {/* Slice 2 replaces this with the client-side booking flow. */}
-        <section className="rounded-lg border bg-card p-6 md:p-8">
-          <h2 className="text-base font-bold">Enter your details below</h2>
-        </section>
-      </BookingMain>
-
-      <footer className="sticky bottom-0 border-t bg-card">
-        <div className="mx-auto flex w-full max-w-2xl justify-end px-4 py-3 md:px-8 lg:max-w-5xl">
-          <button
-            type="button"
-            className="h-11 w-full rounded-lg bg-primary px-8 text-sm font-semibold text-primary-foreground md:w-auto"
-          >
-            Continue
-          </button>
-        </div>
-      </footer>
-    </>
-  );
+  return <BookingFlow practiceCard={<PracticeCard practice={practice} />} />;
 }
