@@ -3,6 +3,13 @@
 @import "shadcn/tailwind.css";
 
 /*
+ * The design is light-only. Tie Tailwind's dark: variant to a .dark class we
+ * never set, so a device in dark mode can't switch on the shadcn dark styles
+ * (they turned the inputs grey, which reads as disabled).
+ */
+@custom-variant dark (&:is(.dark *));
+
+/*
  * Design tokens sampled from the Figma booking-flow frames.
  * shadcn components read the semantic names (primary, border, input...),
  * so changing a value here restyles every component that uses it.
@@ -68,5 +75,7 @@
   }
   html {
     @apply font-sans;
+    /* Keep native controls (autofill, checkboxes, scrollbars) light too. */
+    color-scheme: light;
   }
 }
