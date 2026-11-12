@@ -3,8 +3,11 @@
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { BookingMain, placement } from "@/components/booking-layout";
 import { Button } from "@/components/ui/button";
+import { type Booking, buildBooking } from "@/lib/booking";
 import type { ContactDetails } from "@/lib/booking-schema";
 import type { PaymentDetails } from "@/lib/payment-schema";
+import type { Practice } from "@/lib/practices";
+import { Confirmation } from "./confirmation";
 import { ContactStep } from "./contact-step";
 import { PaymentStep } from "./payment-step";
 
@@ -13,20 +16,16 @@ type Step = "contact" | "payment" | "confirmation";
 const CONTACT_FORM_ID = "contact-form";
 
 type BookingFlowProps = {
+  practice: Practice;
   /** Rendered on the server and passed in, so they ship no client JS. */
   practiceCard: ReactNode;
   servicesSummary: ReactNode;
-  cancellationFeeCents: number;
 };
 
-export function BookingFlow({
-  practiceCard,
-  servicesSummary,
-  cancellationFeeCents,
-}: BookingFlowProps) {
+export function BookingFlow({ practice, practiceCard, servicesSummary }: BookingFlowProps) {
   const [step, setStep] = useState<Step>("contact");
-  const [, setContact] = useState<ContactDetails>();
-  const [, setPayment] = useState<PaymentDetails>();
+  const [contact, setContact] = useState<ContactDetails>();
+  const [booking, setBooking] = useState<Booking>();
   const stepRef = useStepFocus(step);
 
   function handleContact(details: ContactDetails) {
@@ -34,18 +33,31 @@ export function BookingFlow({
     setStep("payment");
   }
 
-  // Slice 4 logs the booking and shows the real confirmation.
-  function handlePayment(details: PaymentDetails) {
-    setPayment(details);
+  function handlePayment(payment: PaymentDetails) {
+    if (!contact) return; // Payment is only reachable after a valid contact step.
+    const submitted = buildBooking({ practice, contact, payment, bookedAt: new Date() });
+    // The exercise has no API: the booking is printed instead of being sent.
+    console.log("Booking submitted:", submitted);
+    setBooking(submitted);
     setStep("confirmation");
   }
 
-  const practice = (
+  if (step === "confirmation" && booking) {
+    return (
+      <BookingMain layout="single">
+        <Confirmation ref={stepRef} email={booking.patient.email} />
+        {practiceCard}
+        {servicesSummary}
+      </BookingMain>
+    );
+  }
+
+  const practiceSlot = (
     <div key="practice" className={placement.practice}>
       {practiceCard}
     </div>
   );
-  const services = (
+  const servicesSlot = (
     <div key="services" className={placement.services}>
       {servicesSummary}
     </div>
@@ -65,12 +77,11 @@ export function BookingFlow({
         <ContactStep formId={CONTACT_FORM_ID} onSubmit={handleContact} />
       </div>
       <div hidden={step !== "payment"}>
-        <PaymentStep cancellationFeeCents={cancellationFeeCents} onSubmit={handlePayment} />
+        <PaymentStep
+          cancellationFeeCents={practice.cancellationFeeCents}
+          onSubmit={handlePayment}
+        />
       </div>
-
-      {step === "confirmation" && (
-        <h2 className="text-base font-bold">Your appointment has been booked!</h2>
-      )}
     </section>
   );
 
@@ -83,31 +94,43 @@ export function BookingFlow({
           straight to the card form, with the summary one scroll away.
           From 1024px the placement classes put them in two columns.
         */}
-        {step === "contact" ? [practice, services, stepCard] : [stepCard, services, practice]}
+        {step === "contact"
+          ? [practiceSlot, servicesSlot, stepCard]
+          : [stepCard, servicesSlot, practiceSlot]}
       </BookingMain>
 
-      {step !== "confirmation" && (
-        <footer className="sticky bottom-0 border-t bg-card">
-          <div className="mx-auto flex w-full max-w-2xl justify-end px-4 py-3 md:px-8 lg:max-w-5xl">
-            {step === "contact" && (
-              <Button type="submit" form={CONTACT_FORM_ID} size="lg" className="w-full md:w-auto">
-                Continue
-              </Button>
-            )}
-            {step === "payment" && (
-              <Button
-                type="button"
-                variant="outline"
-                size="lg"
-                className="w-full md:w-auto"
-                onClick={() => setStep("contact")}
-              >
-                Back
-              </Button>
-            )}
-          </div>
-        </footer>
-      )}
+      <footer className="sticky bottom-0 border-t bg-card">
+        <div className="mx-auto flex w-full max-w-2xl justify-end px-4 py-3 md:px-8 lg:max-w-5xl">
+          {/*
+            Distinct keys matter: if React reused one <button> for both, a
+            click on Back would re-render it as Continue (type="submit")
+            before the browser's default action ran, and submit the contact
+            form straight back to payment.
+          */}
+          {step === "contact" ? (
+            <Button
+              key="continue"
+              type="submit"
+              form={CONTACT_FORM_ID}
+              size="lg"
+              className="w-full md:w-auto"
+            >
+              Continue
+            </Button>
+          ) : (
+            <Button
+              key="back"
+              type="button"
+              variant="outline"
+              size="lg"
+              className="w-full md:w-auto"
+              onClick={() => setStep("contact")}
+            >
+              Back
+            </Button>
+          )}
+        </div>
+      </footer>
     </>
   );
 }

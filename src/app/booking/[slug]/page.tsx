@@ -40,9 +40,9 @@ async function Booking({ params }: { params: Params }) {
 
   return (
     <BookingFlow
+      practice={practice}
       practiceCard={<PracticeCard practice={practice} />}
       servicesSummary={<ServicesSummary services={practice.selectedServices} />}
-      cancellationFeeCents={practice.cancellationFeeCents}
     />
   );
 }

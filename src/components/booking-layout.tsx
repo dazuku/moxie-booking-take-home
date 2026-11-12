@@ -10,13 +10,24 @@ export const placement = {
   step: "lg:col-start-2 lg:row-start-1 lg:row-span-2",
 };
 
-export function BookingMain({ children }: { children: ReactNode }) {
+const grids = {
+  columns:
+    "grid items-start gap-4 md:gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:grid-rows-[auto_1fr]",
+  // Confirmation: one centred column at every size, as in the Figma frames.
+  single: "mx-auto grid w-full max-w-lg gap-4 md:gap-6",
+};
+
+export function BookingMain({
+  layout = "columns",
+  children,
+}: {
+  layout?: keyof typeof grids;
+  children: ReactNode;
+}) {
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-4 md:px-8 md:py-8 lg:max-w-5xl">
       <h1 className="mb-4 text-center text-base font-bold lg:sr-only">Book appointment</h1>
-      <div className="grid items-start gap-4 md:gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:grid-rows-[auto_1fr]">
-        {children}
-      </div>
+      <div className={grids[layout]}>{children}</div>
     </main>
   );
 }
