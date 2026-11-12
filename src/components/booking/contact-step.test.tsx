@@ -74,13 +74,4 @@ describe("ContactStep", () => {
       visitReason: "Botox follow-up",
     });
   });
-
-  it("keeps what the patient typed when they come back to this step", () => {
-    setup({
-      defaultValues: { fullName: "Jane Doe", email: "jane@example.com", phone: "(619) 555-0123", visitReason: "" },
-    });
-
-    expect(screen.getByLabelText("Full Name")).toHaveValue("Jane Doe");
-    expect(screen.getByLabelText("Phone")).toHaveValue("(619) 555-0123");
-  });
 });

@@ -14,12 +14,6 @@ export function toUsE164(input: string): string | null {
   return null;
 }
 
-/** +16195550123 -> (619) 555-0123, for showing a stored number back to the patient. */
-export function formatUsPhone(e164: string): string {
-  const digits = e164.replace(/\D/g, "").slice(-10);
-  return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
-}
-
 const VISIT_REASON_MAX = 500;
 
 export const contactSchema = z.object({

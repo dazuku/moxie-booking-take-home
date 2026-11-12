@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { contactSchema, formatUsPhone } from "./booking-schema";
+import { contactSchema } from "./booking-schema";
 
 const valid = {
   fullName: "Jane Doe",
@@ -55,8 +55,3 @@ describe("contactSchema", () => {
   });
 });
 
-describe("formatUsPhone", () => {
-  it("shows a stored number the way US patients write it", () => {
-    expect(formatUsPhone("+16195550123")).toBe("(619) 555-0123");
-  });
-});
